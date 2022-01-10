@@ -1,4 +1,4 @@
-# holiday-manager
+# dev10-holiday-manager
 
 Text-based application to track US holidays
 
