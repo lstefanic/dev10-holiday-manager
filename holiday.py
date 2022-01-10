@@ -185,7 +185,6 @@ def main():
             save_anyway = input("Are you sure you want to save your changes? (y/n): ")
             if (save_anyway == "y"):
                 holidays.save_to_json("output.json")
-                print("Changes saved")
         if ( action == "5" ):
             break
 
