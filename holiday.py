@@ -14,11 +14,27 @@ from dataclasses import dataclass
 class Holiday:
       
     def __init__(self,name, date):
-        #Your Code Here        
+        self._name = name
+        self._date = date
     
     def __str__ (self):
-        # String output
-        # Holiday output when printed.
+        date_string = self._date.strftime("%Y-%m-%d")
+        return "%s (%s)" % (self._name, date_string)
+
+    def __eq__(self, other):
+        if ( self._name != other._name ):
+            return False
+        self_date = self._date.strftime("%Y-%m-%d")
+        other_date = other._date.strftime("%Y-%m-%d")
+        return (self_date == other_date )
+
+    @property
+    def name(self):
+        return self._name
+    
+    @property
+    def date(self):
+        return self._date
           
            
 # -------------------------------------------
@@ -30,75 +46,138 @@ class HolidayList:
    def __init__(self):
        self.innerHolidays = []
    
-    def addHoliday(holidayObj):
-        # Make sure holidayObj is an Holiday Object by checking the type
-        # Use innerHolidays.append(holidayObj) to add holiday
-        # print to the user that you added a holiday
+    def addHoliday(self, holidayObj):
+        if ( isinstance(holidayObj,Holiday) ):
+            self.innerHolidays.append(holidayObj)
+            print("Holiday added")
 
-    def findHoliday(HolidayName, Date):
-        # Find Holiday in innerHolidays
-        # Return Holiday
+    def findHoliday(self, HolidayName, Date):
+        for holidayObj in self.innerHolidays:
+            if ( holidayObj.name == HolidayName and holidayObj.date == Date ):
+                return holidayObj
+        return None
 
-    def removeHoliday(HolidayName, Date):
-        # Find Holiday in innerHolidays by searching the name and date combination.
-        # remove the Holiday from innerHolidays
-        # inform user you deleted the holiday
+    def removeHoliday(self, HolidayName, Date):
+        holidayObj = findHoliday(self, HolidayName, Date)
+        self.innerHolidays.remove(holidayObj)
+        print("Holiday deleted")
 
-    def read_json(filelocation):
-        # Read in things from json file location
-        # Use addHoliday function to add holidays to inner list.
+    def read_json(self, filelocation):
+        f = open(filelocation)
+        data = json.load(f)
+        f.close()
+        for holiday_dict in data["holidays"]:
+            name = holiday_dict["name"]
+            date = datetime.datetime.strptime(holiday_dict["date"], "%Y-%m-%d")
+            addHoliday(self, Holiday(name,date))
 
-    def save_to_json(filelocation):
-        # Write out json file to selected file.
+    def save_to_json(self, filelocation):
+        holiday_list = []
+        for holidayObj in self.innerHolidays:
+            name = holidayObj.name
+            date = holidayObj.date.strftime("%Y-%m-%d")
+            holiday_dict = {"name": name, "date": date}
+            holiday_list.append(holiday_dict)
+        data = {"holidays": holiday_list}
+        f = open(filelocation, "w")
+        json.dump(data, f, indent=4)
+        f.close()
         
-    def scrapeHolidays():
-        # Scrape Holidays from https://www.timeanddate.com/holidays/us/ 
-        # Remember, 2 previous years, current year, and 2  years into the future. You can scrape multiple years by adding year to the timeanddate URL. For example https://www.timeanddate.com/holidays/us/2022
-        # Check to see if name and date of holiday is in innerHolidays array
-        # Add non-duplicates to innerHolidays
-        # Handle any exceptions.     
+    def scrapeHolidays(self):
+        current_year = datetime.datetime.now().year
+        for year in range(current_year-2,current_year+3):
+            url = "https://www.timeanddate.com/holidays/us/%u" % year
+            response = requests.get(url)
+            html = response.text
+            soup = BeautifulSoup(html, "html.parser")
+            table = soup.find("table", attrs = {"id": "holidays-table"})
+            for row in table.find_all("tr", attrs = {"class": "showrow"}):
+                date_string = "%s, %u" % (row.find("th").string, year)
+                date = datetime.datetime.strptime(date_string, "%b %-d, %Y")
+                name = row.find_all("td")[1].find("a").string
+                if ( findHoliday(self, name, date) is None ):
+                    addHoliday(self, Holiday(name,date))
 
-    def numHolidays():
-        # Return the total number of holidays in innerHolidays
+    def numHolidays(self):
+        return len(innerHolidays)
     
-    def filter_holidays_by_week(year, week_number):
-        # Use a Lambda function to filter by week number and save this as holidays, use the filter on innerHolidays
-        # Week number is part of the the Datetime object
-        # Cast filter results as list
-        # return your holidays
+    def filter_holidays_by_week(self, year, week_number):
+        date_string = "%u, %s" % (year, week_number)
+        return list(filter(lambda x: int(x.date.strftime("%Y, %U")) == week_number, self.innerHolidays))
 
-    def displayHolidaysInWeek(holidayList):
-        # Use your filter_holidays_by_week to get list of holidays within a week as a parameter
-        # Output formated holidays in the week. 
-        # * Remember to use the holiday __str__ method.
+    def displayHolidaysInWeek(self, holidayList):
+        for holidayObj in holidayList:
+            print(holidayObj)
 
-    def getWeather(weekNum):
+    def getWeather(self, weekNum):
         # Convert weekNum to range between two days
         # Use Try / Except to catch problems
         # Query API for weather in that week range
         # Format weather information and return weather string.
+        city = "Minneapolis"
+        current_year = datetime.datetime.now().year
+        start_date = # YYYY-MM-DD
+        end_date = # YYYY-MM-DD
+        url = "https://weatherapi-com.p.rapidapi.com/history.json"
+        query = {"q": city, "dt": start_date, "end_dt": end_date, "lang":"en"}
+        headers = {
+            'x-rapidapi-host': "weatherapi-com.p.rapidapi.com",
+            'x-rapidapi-key': "a2261de387mshd22f0a8befc952bp133a57jsn302de7132003"
+        }
+        response = requests.request("GET", url, headers=headers, params=query)
+        print(response.text)
 
-    def viewCurrentWeek():
-        # Use the Datetime Module to look up current week and year
-        # Use your filter_holidays_by_week function to get the list of holidays 
-        # for the current week/year
-        # Use your displayHolidaysInWeek function to display the holidays in the week
-        # Ask user if they want to get the weather
-        # If yes, use your getWeather function and display results
-
-
+    def viewCurrentWeek(self):
+        current_date = datetime.datetime.now()
+        current_year = current_date.year
+        current_week = current_date.strftime("%U")
+        holidayList = filter_holidays_by_week(self, current_year, current_week)
+        displayHolidaysInWeek(self, holidayList)
+        while ( True ):
+            action = input("Would you like to see this week's weather? (y/n): ")
+            if ( action == "y" ):
+                print(getWeather(current_week))
+                break
+            if ( action == "n" ):
+                break
+    
+    def displayMenu(self):
+        f = open("menu.txt")
+        menu = f.read()
+        f.close()
+        print(menu)
 
 def main():
-    # Large Pseudo Code steps
-    # -------------------------------------
-    # 1. Initialize HolidayList Object
-    # 2. Load JSON file via HolidayList read_json function
-    # 3. Scrape additional holidays using your HolidayList scrapeHolidays function.
-    # 3. Create while loop for user to keep adding or working with the Calender
-    # 4. Display User Menu (Print the menu)
-    # 5. Take user input for their action based on Menu and check the user input for errors
-    # 6. Run appropriate method from the HolidayList object depending on what the user input is
-    # 7. Ask the User if they would like to Continue, if not, end the while loop, ending the program.  If they do wish to continue, keep the program going. 
+    holidays = HolidayList()
+    holidays.read_json("holidays.json")
+    holidays.scrapeHolidays()
+    while ( True ):
+        holidays.displayMenu()
+        action = input("Choose an action (1-5): ")
+        if ( action == "1" ):
+            name = input("Enter a holiday name: ")
+		    date_string = input("Enter a holiday date (YYYY-MM-DD): ")
+            date = datetime.datetime.strptime(date_string, "%Y-%m-%d")
+            if ( holidays.findHoliday(name, date) is None ):
+                holidays.addHoliday(Holiday(name,date))
+        if ( action == "2" ):
+            name = input("Enter a holiday name: ")
+		    date_string = input("Enter a holiday date (YYYY-MM-DD): ")
+            date = datetime.datetime.strptime(date_string, "%Y-%m-%d")
+		    holidays.removeHoliday(name,date)
+        if ( action == "3" ):
+            year = int(input("Enter a year: "))
+		    week = input("Enter a week (1-52, leave blank for current week): ")
+            if (week == ""):
+                holidays.viewCurrentWeek()
+            else:
+                holidays.displayHolidaysInWeek(holidays.filter_holidays_by_week(year,week))
+        if ( action == "4" ):
+            save_anyway = input("Are you sure you want to save your changes? (y/n): ")
+	        if (save_anyway == "y"):
+	            holidays.save_to_json("output.json")
+        if ( action == "5" ):
+            break
 
 
 if __name__ == "__main__":

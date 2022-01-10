@@ -1,0 +1,6 @@
+Main Menu:
+1. Add a holiday
+2. Remove a holiday
+3. View holidays
+4. Save
+5. Exit
