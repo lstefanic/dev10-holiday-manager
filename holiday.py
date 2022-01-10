@@ -49,7 +49,7 @@ class HolidayList:
     def addHoliday(self, holidayObj):
         if ( isinstance(holidayObj,Holiday) ):
             self.innerHolidays.append(holidayObj)
-            print("Holiday added")
+            print(holidayObj + " has been successfully added")
 
     def findHoliday(self, HolidayName, Date):
         for holidayObj in self.innerHolidays:
@@ -61,7 +61,7 @@ class HolidayList:
         holidayObj = self.findHoliday(HolidayName, Date)
         if ( holidayObj is not None ):
             self.innerHolidays.remove(holidayObj)
-            print("Holiday deleted")
+            print("%s has been successfully removed" % HolidayName)
 
     def read_json(self, filelocation):
         f = open(filelocation)
@@ -83,25 +83,29 @@ class HolidayList:
         f = open(filelocation, "w")
         json.dump(data, f, indent=4)
         f.close()
+        print("Your changes have been saved")
         
     def scrapeHolidays(self):
-        current_year = datetime.datetime.now().year
-        for year in range(current_year-2,current_year+3):
-            url = "https://www.timeanddate.com/holidays/us/%u" % year
-            response = requests.get(url)
-            html = response.text
-            soup = BeautifulSoup(html, "html.parser")
-            table = soup.find("table", attrs = {"id": "holidays-table"})
-            body = table.find("tbody")
-            for row in body.find_all("tr"):
-                if ( "data-mask" in row.attrs ):
-                    link = row.find("a").attrs["href"]
-                    if ( link.count("holidays/us") > 0 ):
-                        date_string = "%s, %u" % (row.find("th").string, year)
-                        date = datetime.datetime.strptime(date_string, "%b %d, %Y")
-                        name = row.find_all("td")[1].find("a").string
-                        if ( self.findHoliday(name, date) is None ):
-                            self.addHoliday(Holiday(name,date))
+        try:
+            current_year = datetime.datetime.now().year
+            for year in range(current_year-2,current_year+3):
+                url = "https://www.timeanddate.com/holidays/us/%u" % year
+                response = requests.get(url)
+                html = response.text
+                soup = BeautifulSoup(html, "html.parser")
+                table = soup.find("table", attrs = {"id": "holidays-table"})
+                body = table.find("tbody")
+                for row in body.find_all("tr"):
+                    if ( "data-mask" in row.attrs ):
+                        link = row.find("a").attrs["href"]
+                        if ( link.count("holidays/us") > 0 ):
+                            date_string = "%s, %u" % (row.find("th").string, year)
+                            date = datetime.datetime.strptime(date_string, "%b %d, %Y")
+                            name = row.find_all("td")[1].find("a").string
+                            if ( self.findHoliday(name, date) is None ):
+                                self.addHoliday(Holiday(name,date))
+        except:
+            print("An exception has occurred")
 
     def numHolidays(self):
         return len(innerHolidays)
@@ -114,25 +118,22 @@ class HolidayList:
         for holidayObj in holidayList:
             print(holidayObj)
 
-    # def getWeather(self, weekNum):
-        # Convert weekNum to range between two days
-        # Use Try / Except to catch problems
-        # Query API for weather in that week range
-        # Format weather information and return weather string./
-
-        # city = "Minneapolis"
-        # current_year = datetime.datetime.now().year
-        # start_date = # YYYY-MM-DD
-        # end_date = # YYYY-MM-DD
-        # url = "https://weatherapi-com.p.rapidapi.com/history.json"
-        # query = {"q": city, "dt": start_date, "end_dt": end_date, "lang":"en"}
-        # headers = {
-        #     'x-rapidapi-host': "weatherapi-com.p.rapidapi.com",
-        #     'x-rapidapi-key': "a2261de387mshd22f0a8befc952bp133a57jsn302de7132003"
-        # }
-        # response = requests.request("GET", url, headers=headers, params=query)
-        # print(response.text)
-        # return "Here's the weather"
+    def getWeather(self, weekNum):
+        try:
+            city = "Minneapolis"
+            current_year = datetime.datetime.now().year
+            start_date = # YYYY-MM-DD
+            end_date = # YYYY-MM-DD
+            url = "https://weatherapi-com.p.rapidapi.com/history.json"
+            query = {"q": city, "dt": start_date, "end_dt": end_date, "lang":"en"}
+            headers = {
+                'x-rapidapi-host': "weatherapi-com.p.rapidapi.com",
+                'x-rapidapi-key': "a2261de387mshd22f0a8befc952bp133a57jsn302de7132003"
+            }
+            response = requests.request("GET", url, headers=headers, params=query)
+            return response.text
+        except:
+            print("An exception has occurred")
 
     def viewCurrentWeek(self):
         current_date = datetime.datetime.now()
@@ -140,13 +141,13 @@ class HolidayList:
         current_week = current_date.strftime("%U")
         holidayList = self.filter_holidays_by_week(current_year, current_week)
         self.displayHolidaysInWeek(holidayList)
-        # while ( True ):
-        #     action = input("Would you like to see this week's weather? (y/n): ")
-        #     if ( action == "y" ):
-        #         print(getWeather(current_week))
-        #         break
-        #     if ( action == "n" ):
-        #         break
+        while ( True ):
+            action = input("Would you like to see this week's weather? (y/n): ")
+            if ( action == "y" ):
+                print(getWeather(current_week))
+                break
+            if ( action == "n" ):
+                break
     
     def displayMenu(self):
         f = open("menu.txt")
@@ -158,6 +159,7 @@ def main():
     holidays = HolidayList()
     holidays.read_json("holidays.json")
     holidays.scrapeHolidays()
+    print("There are %u holidays stored in the system" % holidays.numHolidays())
     while ( True ):
         holidays.displayMenu()
         action = input("Choose an action (1-5): ")
