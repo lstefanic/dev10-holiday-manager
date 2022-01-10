@@ -144,7 +144,7 @@ class HolidayList:
         while ( True ):
             action = input("Would you like to see this week's weather? (y/n): ")
             if ( action == "y" ):
-                print(getWeather(current_week))
+                print(self.getWeather(current_week))
                 break
             if ( action == "n" ):
                 break
