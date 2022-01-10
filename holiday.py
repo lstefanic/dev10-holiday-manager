@@ -59,8 +59,9 @@ class HolidayList:
 
     def removeHoliday(self, HolidayName, Date):
         holidayObj = self.findHoliday(HolidayName, Date)
-        self.innerHolidays.remove(holidayObj)
-        print("Holiday deleted")
+        if ( holidayObj is not None ):
+            self.innerHolidays.remove(holidayObj)
+            print("Holiday deleted")
 
     def read_json(self, filelocation):
         f = open(filelocation)
@@ -113,7 +114,7 @@ class HolidayList:
         for holidayObj in holidayList:
             print(holidayObj)
 
-    def getWeather(self, weekNum):
+    # def getWeather(self, weekNum):
         # Convert weekNum to range between two days
         # Use Try / Except to catch problems
         # Query API for weather in that week range
@@ -131,7 +132,7 @@ class HolidayList:
         # }
         # response = requests.request("GET", url, headers=headers, params=query)
         # print(response.text)
-        return "Here's the weather"
+        # return "Here's the weather"
 
     def viewCurrentWeek(self):
         current_date = datetime.datetime.now()
@@ -139,13 +140,13 @@ class HolidayList:
         current_week = current_date.strftime("%U")
         holidayList = self.filter_holidays_by_week(current_year, current_week)
         self.displayHolidaysInWeek(holidayList)
-        while ( True ):
-            action = input("Would you like to see this week's weather? (y/n): ")
-            if ( action == "y" ):
-                print(getWeather(current_week))
-                break
-            if ( action == "n" ):
-                break
+        # while ( True ):
+        #     action = input("Would you like to see this week's weather? (y/n): ")
+        #     if ( action == "y" ):
+        #         print(getWeather(current_week))
+        #         break
+        #     if ( action == "n" ):
+        #         break
     
     def displayMenu(self):
         f = open("menu.txt")
@@ -182,6 +183,7 @@ def main():
             save_anyway = input("Are you sure you want to save your changes? (y/n): ")
             if (save_anyway == "y"):
                 holidays.save_to_json("output.json")
+                print("Changes saved")
         if ( action == "5" ):
             break
 
