@@ -49,7 +49,7 @@ class HolidayList:
     def addHoliday(self, holidayObj):
         if ( isinstance(holidayObj,Holiday) ):
             self.innerHolidays.append(holidayObj)
-            print(holidayObj + " has been successfully added")
+            print(str(holidayObj) + " has been successfully added")
 
     def findHoliday(self, HolidayName, Date):
         for holidayObj in self.innerHolidays:
@@ -108,7 +108,7 @@ class HolidayList:
             print("An exception has occurred")
 
     def numHolidays(self):
-        return len(innerHolidays)
+        return len(self.innerHolidays)
     
     def filter_holidays_by_week(self, year, week_number):
         date_string = "%u, %s" % (year, week_number)
@@ -122,8 +122,8 @@ class HolidayList:
         try:
             city = "Minneapolis"
             current_year = datetime.datetime.now().year
-            start_date = # YYYY-MM-DD
-            end_date = # YYYY-MM-DD
+            # start_date = # YYYY-MM-DD
+            # end_date = # YYYY-MM-DD
             url = "https://weatherapi-com.p.rapidapi.com/history.json"
             query = {"q": city, "dt": start_date, "end_dt": end_date, "lang":"en"}
             headers = {
